@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>スポーツ結果予想サイト</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-blue: #0A5EBA;
+            --btn-blue: #0077D4;
+            --btn-green: #2CB45B;
+            --btn-orange: #F99F1B;
+            --btn-purple: #7D52B3;
+            --bg-light: #F4F7F9;
+            --border-color: #E2E8F0;
+            --text-dark: #333333;
+            
+            --team-blue: #005CAF;
+            --team-gray: #888888;
+            --team-red: #D91E18;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Noto Sans JP', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-light);
+            color: var(--text-dark);
+        }
+
+        /* --- ヘッダー --- */
+        header {
+            background-color: var(--primary-blue);
+            color: white;
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-logo-area {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logo-title {
+            font-size: 24px;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+
+        .logo-sub {
+            font-size: 13px;
+            opacity: 0.9;
+        }
+
+        .header-nav {
+            display: flex;
+            gap: 10px;
+        }
+
+        .nav-header-btn {
+            background-color: white;
+            color: #032F61;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 8px;
+            font-weight: bold;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-size: 11px;
+            cursor: pointer;
+            width: 70px;
+        }
+
+        .nav-header-btn i {
+            font-size: 18px;
+            margin-bottom: 3px;
+        }
+
+        /* --- メインナビゲーション --- */
+        .main-nav {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .nav-card {
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 18px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            text-decoration: none;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            border: none;
+        }
+
+        .nav-card.blue { background-color: var(--btn-blue); }
+        .nav-card.green { background-color: var(--btn-green); }
+        .nav-card.orange { background-color: var(--btn-orange); }
+        .nav-card.purple { background-color: var(--btn-purple); }
+
+        /* --- コンテンツエリア共通 --- */
+        .content-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px 40px 20px;
+        }
+
+        /* 画面切り替え用の非表示クラス */
+        .hidden {
+            display: none !important;
+        }
+
+        .section-title-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .section-title {
+            font-size: 22px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: bold;
+        }
+
+        .btn-refresh {
+            background-color: white;
+            border: 1px solid #A0AEC0;
+            padding: 6px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            color: #4A5568;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        /* ==========================================
+           画面1: 今日の試合一覧（テーブルスタイル）
+        ========================================== */
+        .match-table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            border: 1px solid var(--border-color);
+        }
+
+        .match-table th {
+            background-color: #F8FAFC;
+            padding: 12px;
+            font-size: 14px;
+            color: #4A5568;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .match-table td {
+            padding: 20px 10px;
+            border-bottom: 1px solid var(--border-color);
+            vertical-align: middle;
+            text-align: center;
+        }
+
+        .col-time { font-size: 26px; font-weight: bold; }
+        .league-box { display: flex; flex-direction: column; align-items: center; gap: 5px; font-size: 13px; font-weight: bold;}
+        .league-box i { font-size: 24px; color: #4A5568;}
+
+        .matchup-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+        }
+        .team-name { font-size: 15px; font-weight: bold; width: 120px; }
+        .team-name.left { text-align: right; }
+        .team-name.right { text-align: left; }
+        .vs-text { font-size: 20px; font-weight: bold; color: #718096; }
+
+        .prediction-box {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            max-width: 280px;
+            margin: 0 auto;
+        }
+        .btn-predict-main {
+            background-color: #0062C4;
+            color: white;
+            border: none;
+            padding: 8px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        .sub-options { display: flex; gap: 8px; }
+        .btn-predict-sub {
+            flex: 1; background-color: white; border: 1px solid #CBD5E0;
+            padding: 6px; border-radius: 4px; font-size: 12px; font-weight: bold; cursor: pointer;
+        }
+        .btn-change-predict {
+            background-color: white; border: 1px solid #CBD5E0;
+            padding: 4px; border-radius: 4px; font-size: 11px; color: #718096; cursor: pointer;
+        }
+        .col-arrow { color: #A0AEC0; font-size: 18px; }
+
+        /* ダミーロゴ */
+        .dummy-logo {
+            width: 45px; height: 45px; background-color: #EDF2F7; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: bold; color: #718096;
+        }
+
+        /* ==========================================
+           画面2: かんたん勝敗予想（カードスタイル）
+        ========================================== */
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .predict-card {
+            background-color: white;
+            border: 1px solid #C8D6E5;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+        }
+
+        /* カード上部：対戦カード */
+        .card-match-header {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 10px;
+        }
+        .card-team {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+            width: 120px;
+            font-weight: bold;
+            font-size: 15px;
+            text-align: center;
+        }
+        .card-vs {
+            font-size: 24px;
+            font-weight: bold;
+            color: #4A5568;
+        }
+        .card-info-text {
+            text-align: center;
+            font-size: 13px;
+            color: #4A5568;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        /* カード中部：どっちが勝つ？ */
+        .card-question {
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 12px;
+        }
+
+        /* 投票ボタン3列 */
+        .vote-options-row {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        .btn-vote-choice {
+            border: none;
+            border-radius: 8px;
+            color: white;
+            padding: 12px 5px;
+            font-weight: bold;
+            font-size: 13px;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+        }
+        .btn-vote-choice.blue { background-color: var(--team-blue); }
+        .btn-vote-choice.gray { background-color: var(--team-gray); }
+        .btn-vote-choice.red { background-color: var(--team-red); }
+        .btn-vote-choice i { font-size: 18px; }
+
+        /* 応援数エリア */
+        .cheer-count {
+            background-color: #EDF2F7;
+            border-radius: 6px;
+            padding: 6px 2px;
+            text-align: center;
+            font-size: 11px;
+            color: #4A5568;
+        }
+        .cheer-count .count-num {
+            display: block;
+            font-size: 14px;
+            font-weight: bold;
+            color: #2D3748;
+            margin-top: 2px;
+        }
+
+        /* 投票決定ボタン */
+        .btn-submit-vote {
+            width: 100%;
+            background-color: var(--btn-green);
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        /* 下部の横長カード（Bリーグ用） */
+        .predict-card-wide {
+            background-color: white;
+            border: 1px solid #C8D6E5;
+            border-radius: 12px;
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .wide-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            width: 55%;
+        }
+        .wide-right {
+            width: 40%;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .wide-vote-row {
+            display: flex;
+            gap: 10px;
+        }
+        .btn-vote-wide {
+            flex: 1;
+            border: none;
+            border-radius: 20px;
+            padding: 8px 15px;
+            color: white;
+            font-weight: bold;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        .btn-vote-wide.orange { background-color: #C18600; }
+        .btn-vote-wide.red { background-color: #D91E18; }
+
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="header-logo-area">
+            <div class="logo-title"><i class="fa-solid fa-futbol"></i> スポーツ結果予想サイト</div>
+            <div class="logo-sub">みんなの予想でスポーツをもっと楽しく！</div>
+        </div>
+        <div class="header-nav">
+            <button class="nav-header-btn"><i class="fa-regular fa-circle-question"></i>使い方</button>
+            <button class="nav-header-btn"><i class="fa-solid fa-bars"></i>メニュー</button>
+        </div>
+    </header>
+
+    <nav class="main-nav">
+        <button id="nav-today" class="nav-card blue"><i class="fa-regular fa-calendar-days"></i> 今日の試合</button>
+        <button id="nav-predict" class="nav-card green"><i class="fa-solid fa-chart-simple"></i> 予想する</button>
+        <button class="nav-card orange"><i class="fa-solid fa-trophy"></i> ランキング</button>
+        <button class="nav-card purple"><i class="fa-regular fa-user"></i> マイページ</button>
+    </nav>
+
+    <main id="page-today" class="content-container">
+        <div class="section-title-bar">
+            <div class="section-title">
+                <i class="fa-regular fa-calendar-days" style="color: var(--primary-blue);"></i> 今日の試合一覧
+            </div>
+            <button class="btn-refresh"><i class="fa-solid fa-arrows-rotate"></i> 更新する</button>
+        </div>
+
+        <table class="match-table">
+            <thead>
+                <tr>
+                    <th style="width: 10%">時間</th>
+                    <th style="width: 15%">大会</th>
+                    <th style="width: 42%">対戦カード</th>
+                    <th style="width: 30%">あなたの予想</th>
+                    <th style="width: 3%"></th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="col-time">14:00</td>
+                    <td class="col-league">
+                        <div class="league-box"><i class="fa-solid fa-futbol"></i><span>Jリーグ<br>第15節</span></div>
+                    </td>
+                    <td class="col-matchup">
+                        <div class="matchup-container">
+                            <span class="team-name left">横浜FM</span>
+                            <div class="dummy-logo" style="border: 2px solid #002F6C; color:#002F6C;">横浜FM</div> 
+                            <span class="vs-text">VS</span>
+                            <div class="dummy-logo" style="border: 2px solid #E60012; color:#E60012;">名古屋</div>
+                            <span class="team-name right">名古屋グランパス</span>
+                        </div>
+                    </td>
+                    <td class="col-prediction">
+                        <div class="prediction-box">
+                            <button class="btn-predict-main">横浜FMの勝ち</button>
+                            <div class="sub-options">
+                                <button class="btn-predict-sub">引き分け</button>
+                                <button class="btn-predict-sub">名古屋の勝ち</button>
+                            </div>
+                            <button class="btn-change-predict">予想を変更</button>
+                        </div>
+                    </td>
+                    <td class="col-arrow"><i class="fa-solid fa-chevron-right"></i></td>
+                </tr>
+                <tr>
+                    <td class="col-time">18:00</td>
+                    <td class="col-league">
+                        <div class="league-box"><i class="fa-solid fa-baseball"></i><span>プロ野球<br>交流戦</span></div>
+                    </td>
+                    <td class="col-matchup">
+                        <div class="matchup-container">
+                            <span class="team-name left">巨人</span>
+                            <div class="dummy-logo" style="background-color: #F93; color: black;">巨人</div>
+                            <span class="vs-text">VS</span>
+                            <div class="dummy-logo" style="background-color: #FFF; border:1px solid #F90; color: #333;">SB</div>
+                            <span class="team-name right">ソフトバンク</span>
+                        </div>
+                    </td>
+                    <td class="col-prediction">
+                        <div class="prediction-box">
+                            <button class="btn-predict-main">巨人の勝ち</button>
+                            <div class="sub-options">
+                                <button class="btn-predict-sub">引き分け</button>
+                                <button class="btn-predict-sub">ソフトバンクの勝ち</button>
+                            </div>
+                            <button class="btn-change-predict">予想を変更</button>
+                        </div>
+                    </td>
+                    <td class="col-arrow"><i class="fa-solid fa-chevron-right"></i></td>
+                </tr>
+            </tbody>
+        </table>
+    </main>
+
+    <main id="page-predict" class="content-container hidden">
+        <div class="section-title-bar">
+            <div class="section-title">かんたん勝敗予想</div>
+        </div>
+
+        <div class="cards-grid">
+            
+            <div class="predict-card">
+                <div class="card-match-header">
+                    <div class="card-team">
+                        <div class="dummy-logo" style="border: 2px solid #002F6C; color:#002F6C;">横浜FM</div>
+                        <span>横浜F・マリノス</span>
+                    </div>
+                    <div class="card-vs">VS</div>
+                    <div class="card-team">
+                        <div class="dummy-logo" style="border: 2px solid #E60012; color:#E60012;">名古屋</div>
+                        <span>名古屋グランパス</span>
+                    </div>
+                </div>
+                <div class="card-info-text">14:00 | Jリーグ 第15節</div>
+                
+                <div class="card-question">どっちが勝つ？</div>
+                
+                <div class="vote-options-row">
+                    <button class="btn-vote-choice blue">
+                        <i class="fa-regular fa-face-smile-beam"></i>
+                        <span>横浜FMの勝利</span>
+                    </button>
+                    <button class="btn-vote-choice gray">
+                        <i class="fa-solid fa-handshake"></i>
+                        <span>引き分け</span>
+                    </button>
+                    <button class="btn-vote-choice red">
+                        <i class="fa-regular fa-face-smile-beam"></i>
+                        <span>名古屋の勝利</span>
+                    </button>
+                    
+                    <div class="cheer-count">みんなの応援数<span class="count-num"><i class="fa-solid fa-megaphone"></i> 1,234</span></div>
+                    <div class="cheer-count">みんなの応援数<span class="count-num"><i class="fa-solid fa-megaphone"></i> 1,173</span></div>
+                    <div class="cheer-count">みんなの応援数<span class="count-num"><i class="fa-solid fa-megaphone"></i> 987</span></div>
+                </div>
+                
+                <button class="btn-submit-vote">この予想で投票する</button>
+            </div>
+
+            <div class="predict-card">
+                <div class="card-match-header">
+                    <div class="card-team">
+                        <div class="dummy-logo" style="background-color: #F93; color: black;">巨人</div>
+                        <span>読売ジャイアンツ</span>
+                    </div>
+                    <div class="card-vs">VS</div>
+                    <div class="card-team">
+                        <div class="dummy-logo" style="background-color: #FFF; border:1px solid #F90; color: #333;">SB</div>
+                        <span>福岡ソフトバンクホークス</span>
+                    </div>
+                </div>
+                <div class="card-info-text">18:00 | プロ野球 交流戦</div>
+                
+                <div class="card-question">どっちが勝つ？</div>
+                
+                <div class="vote-options-row">
+                    <button class="btn-vote-choice blue">
+                        <i class="fa-regular fa-face-smile-beam"></i>
+                        <span>巨人の勝利</span>
+                    </button>
+                    <button class="btn-vote-choice gray">
+                        <i class="fa-solid fa-handshake"></i>
+                        <span>引き分け</span>
+                    </button>
+                    <button class="btn-vote-choice red">
+                        <i class="fa-regular fa-face-smile-beam"></i>
+                        <span>SBの勝利</span>
+                    </button>
+                    
+                    <div class="cheer-count">みんなの応援数<span class="count-num"><i class="fa-solid fa-megaphone"></i> 1,234</span></div>
+                    <div class="cheer-count">みんなの応援数<span class="count-num"><i class="fa-solid fa-megaphone"></i> 1,173</span></div>
+                    <div class="cheer-count">みんなの応援数<span class="count-num"><i class="fa-solid fa-megaphone"></i> 987</span></div>
+                </div>
+                
+                <button class="btn-submit-vote">この予想で投票する</button>
+            </div>
+
+        </div>
+
+        <div class="predict-card-wide">
+            <div class="wide-left">
+                <span style="font-size: 24px; font-weight: bold; padding-right: 10px;">21:00</span>
+                <div class="league-box"><i class="fa-solid fa-basketball"></i><span style="font-size: 11px;">Bリーグ<br>プレーオフ</span></div>
+                <span style="font-weight: bold; font-size:14px; width:110px; text-align:right;">琉球ゴールデンキングス</span>
+                <div class="dummy-logo" style="background-color: #002B5B; color: #D4AF37; width:35px; height:35px; min-width:35px;">琉球</div>
+                <span style="font-weight: bold; color: #718096;">VS</span>
+                <div class="dummy-logo" style="background-color: #E31837; color: white; width:35px; height:35px; min-width:35px;">千葉</div>
+                <span style="font-weight: bold; font-size:14px;">千葉ジェッツ</span>
+            </div>
+            
+            <div class="wide-right">
+                <div style="text-align: center; font-weight: bold; font-size: 15px;">どっちが勝つ？ <span style="font-size: 11px; color:#718096; font-weight: normal;">(割振り)</span></div>
+                <div class="wide-vote-row">
+                    <button class="btn-vote-wide orange">● 琉球の勝利</button>
+                    <button class="btn-vote-wide red">● 千葉の勝利</button>
+                </div>
+                <div style="display:flex; justify-content: space-between; align-items:center;">
+                    <div style="font-size: 11px; color:#4A5568;"><i class="fa-solid fa-megaphone"></i> みんなの応援数 <b>987</b></div>
+                    <button class="btn-submit-vote" style="width: auto; padding: 6px 20px; font-size: 13px;">この予想で投票する</button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const btnToday = document.getElementById('nav-today');
+        const btnPredict = document.getElementById('nav-predict');
+        
+        const pageToday = document.getElementById('page-today');
+        const pagePredict = document.getElementById('page-predict');
+
+        // 「予想する」ボタンが押されたとき
+        btnPredict.addEventListener('click', () => {
+            pageToday.classList.add('hidden');       // 今日の試合一覧を隠す
+            pagePredict.classList.remove('hidden');   // かんたん勝敗予想を表示
+        });
+
+        // 「今日の試合」ボタンが押されたとき（戻る用）
+        btnToday.addEventListener('click', () => {
+            pagePredict.classList.add('hidden');     // かんたん勝敗予想を隠す
+            pageToday.classList.remove('hidden');     // 今日の試合一覧を表示
+        });
+    </script>
+</body>
+</html>
